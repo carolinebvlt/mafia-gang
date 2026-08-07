@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Mafia-Gang - Player</title>
+</head>
+
+<body>
+
+<h1>Welcome {{ player["name"] }}</h1>
+<a href="/market">Market</a>
+
+<p>Welcome to your criminal network.</p>
+
+<p>Country: {{ player["country"] }}</p>
+
+<p>Money: {{ player["money"] }}</p>
+
+<p>Ammo: {{player["ammo"]}}</p> 
+<form action="/buy_ammo" method="POST">
+    <button>
+        Buy ammo
+    </button>
+</form>
+
+</body>
+
+</html>

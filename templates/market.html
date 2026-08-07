@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Mafia-Gang - Player</title>
+</head>
+
+<body>
+    <h1>Market : {{player['country']}}</h1>
+    {% for item in current_market %}
+    
+    <p>{{item['item']}} : {{item['current_price']}}</p>
+    
+
+    {%endfor%}
+
+</body>
