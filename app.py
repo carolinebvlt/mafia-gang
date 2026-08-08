@@ -87,7 +87,7 @@ def market():
     return render_template(
         "market.html",
         player = player,
-        current_market=market
+        market=market
     )
 
 

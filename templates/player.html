@@ -1,13 +1,7 @@
-<!DOCTYPE html>
-<html>
+{% extends "base.html" %}
 
-<head>
-    <title>Mafia-Gang - Player</title>
-</head>
 
-<body>
-
-<h1>Welcome {{ player["name"] }}</h1>
+{% block content %}
 <a href="/market">Market</a>
 
 <p>Welcome to your criminal network.</p>
@@ -23,6 +17,4 @@
     </button>
 </form>
 
-</body>
-
-</html>
+{% endblock %}

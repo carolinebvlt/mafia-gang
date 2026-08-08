@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Mafia-Gang</title>
+</head>
+
+<body>
+
+<header>
+
+    <h1>Mafia-Gang</h1>
+
+    {% if player %}
+        <p>
+            Joueur : {{ player["name"] }}
+            |
+            Argent : {{ player["money"] }} $
+        </p>
+    {% endif %}
+
+</header>
+
+
+<hr>
+
+
+{% block content %}
+
+{% endblock %}
+
+
+</body>
+</html>
