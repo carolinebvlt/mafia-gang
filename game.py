@@ -1,7 +1,7 @@
 import sqlite3
 import data
 from datetime import date
-from random import randint
+from random import randint, choice
 
 def buy_one_ammo(player_id):
 
@@ -53,36 +53,81 @@ def get_current_market(player_id):
     connexion.row_factory = sqlite3.Row
     curseur = connexion.cursor()
 
+    # check the date of the last modification of the market prices
     curseur.execute(
         "SELECT last_market_update FROM game_state"
     )
     last_market_update = curseur.fetchone()
+    connexion.close()
+
+    # if it doesn't exist, init market
     if last_market_update == None :
         init_market()
     else :
         date_last_market_update = last_market_update[0]
 
-
+    # If the last update was today, load market for country of the player
     if date_last_market_update == str(date.today()): 
-        # load market for country of the player
-        curseur.execute(
-            "SELECT country FROM players WHERE id = ?",
-            (player_id,)
-        )
-        country = curseur.fetchone()['country']
-        curseur.execute(
-            "SELECT item, current_price FROM market WHERE country = ?",
-            (country,)
-        )
-        market = curseur.fetchall()
+        
+        current_market = get_market(player_id)
+        return current_market
 
-        return market
-
-    #else update market
+    # If the last update was yesterday, update market, then load market of the player
+    else :
+        update_market()
+        current_market = get_market(player_id)
+        return current_market
         
 
 
+def get_market(player_id) :
+    connexion = sqlite3.connect("mafia.db")
+    connexion.row_factory = sqlite3.Row
+    curseur = connexion.cursor()
+    curseur.execute(
+        "SELECT country FROM players WHERE id = ?",
+        (player_id,)
+    )
+    country = curseur.fetchone()['country']
+    curseur.execute(
+        "SELECT item, current_price FROM market WHERE country = ?",
+        (country,)
+    )
+    market = curseur.fetchall()
+
+    return market
+
+def update_market():
+    connexion = sqlite3.connect("mafia.db")
+    connexion.row_factory = sqlite3.Row
+    curseur = connexion.cursor()
+    curseur.execute(
+        "SELECT id, item, current_price FROM market"
+    )
+    market = curseur.fetchall()
+    for element in market : 
+        progression = choice(["lower", "higher"])
+        rate = randint(1,10)
+        previous_price = element['current_price']
+        if progression == "lower" :
+            new_price = (previous_price - previous_price*rate//100 )
+        elif progression == "higher":
+            new_price = (previous_price + previous_price*rate//100 )
+
+        curseur.execute(
+                "UPDATE market SET current_price = ?, previous_price = ? WHERE id = ?",
+                (new_price, previous_price, element['id'])
+            )
+
+    curseur.execute(
+        "UPDATE game_state SET last_market_update = ?",
+        (date.today(),)
+    )
+
+    connexion.commit()
     connexion.close()
+
+
 
 def init_market():
 
