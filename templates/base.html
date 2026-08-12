@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Mafia-Gang</title>
 </head>
@@ -11,23 +12,44 @@
     <h1>Mafia-Gang</h1>
 
     {% if player %}
+
         <p>
             Joueur : {{ player["name"] }}
             |
             Argent : {{ player["money"] }} $
+            |
+            Country : {{ player["country"] }}
         </p>
+
+        <form action="/travel" method="POST">
+
+            <select name="travel">
+
+                {% for country in countries %}
+
+                    <option value="{{ country }}">
+                        {{ country }}
+                    </option>
+
+                {% endfor %}
+
+            </select>
+
+            <button type="submit">
+                Travel
+            </button>
+
+        </form>
+
     {% endif %}
 
 </header>
 
-
 <hr>
-
 
 {% block content %}
 
 {% endblock %}
-
 
 </body>
 </html>

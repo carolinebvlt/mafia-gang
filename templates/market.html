@@ -1,17 +1,40 @@
 {% extends "base.html" %}
 
-
 {% block content %}
 
 <h2>Market</h2>
 
 {% for item in market %}
 
-<p>
-{{ item["item"] }} : {{ item["current_price"] }} $
-</p>
+    <p>
+        {{ item["name"] }} : {{ item["current_price"] }} $
+    </p>
+
+    <form action="/buy_alcohol" method="POST">
+
+        <button name="alcohol_id" value="{{ item['alcohol_id'] }}" type="submit">Buy</button>
+
+    </form>
 
 {% endfor %}
 
+
+<h2>Stock</h2>
+
+{% for item in inventory_player %}
+
+    <p>
+        {{ item["name"] }} : {{ item["amount"] }}
+    </p>
+    <form action="/sell_alcohol" method="POST">
+        <button
+            type="submit"
+            name="alcohol_id"
+            value="{{ item['alcohol_id'] }}">
+            Sell
+        </button>
+    </form>
+
+{% endfor %}
 
 {% endblock %}

@@ -6,6 +6,7 @@ import game
 app = Flask(__name__)
 app.secret_key = "mafia-secret-key"
 
+
 @app.route("/", methods=["GET", "POST"])
 def home():
 
@@ -23,7 +24,6 @@ def home():
         ammo = 3
 
         connexion = sqlite3.connect("mafia.db")
-
         curseur = connexion.cursor()
 
         curseur.execute("""
@@ -55,6 +55,7 @@ def home():
         countries=COUNTRIES
     )
 
+
 @app.route("/player")
 def player():
 
@@ -64,8 +65,10 @@ def player():
 
     return render_template(
         "player.html",
-        player=player
+        player=player,
+        countries=COUNTRIES
     )
+
 
 @app.route("/buy_ammo", methods=["POST"])
 def buy_ammo():
@@ -76,6 +79,7 @@ def buy_ammo():
 
     return redirect("/player")
 
+
 @app.route("/market")
 def market():
 
@@ -83,12 +87,49 @@ def market():
 
     player = game.get_player(player_id)
     market = game.get_current_market(player_id)
+    inventory_player = game.get_inventory_player(player_id)
 
     return render_template(
         "market.html",
-        player = player,
-        market=market
+        player=player,
+        market=market,
+        inventory_player=inventory_player,
+        countries=COUNTRIES
     )
+
+
+@app.route("/buy_alcohol", methods=["POST"])
+def buy_alcohol():
+
+    player_id = session.get("player_id")
+    alcohol_id = request.form["alcohol_id"]
+
+    game.buy_one_alcohol(player_id, alcohol_id)
+
+    return redirect("/market")
+
+
+@app.route("/travel", methods=["POST"])
+def travel():
+
+    player_id = session.get("player_id")
+    country = request.form["travel"]
+
+    
+    game.travelTo(player_id, country)
+
+    return redirect("/player")
+
+@app.route("/sell_alcohol", methods=["POST"])
+def sell_alcohol():
+
+    player_id = session.get("player_id")
+    alcohol_id = request.form["alcohol_id"]
+
+    print(alcohol_id)
+    game.sell_one_alcohol(player_id, alcohol_id)
+
+    return redirect("/market")
 
 
 app.run(debug=True)
