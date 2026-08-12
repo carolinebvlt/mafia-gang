@@ -335,15 +335,20 @@ def get_inventory_player(player_id):
     return inventory_player
 
 def travelTo(player_id, country):
-    connexion = sqlite3.connect("mafia.db")
-    connexion.row_factory = sqlite3.Row
-    curseur = connexion.cursor()
 
-    curseur.execute("UPDATE players SET country = ? WHERE id = ?",
-                    (country, player_id))
+    if check_enough_money(player_id, 250) :
 
-    connexion.commit()
-    connexion.close()
+        connexion = sqlite3.connect("mafia.db")
+        connexion.row_factory = sqlite3.Row
+        curseur = connexion.cursor()
+
+        curseur.execute("UPDATE players SET country = ? WHERE id = ?",
+                        (country, player_id))
+        curseur.execute("UPDATE players set money = money-250 WHERE id = ?", 
+                        (player_id,))
+
+        connexion.commit()
+        connexion.close()
 
 
 def sell_one_alcohol(player_id, alcohol_id):
