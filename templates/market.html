@@ -2,39 +2,55 @@
 
 {% block content %}
 
-<h2>Market</h2>
+<div id="market_page">
 
-{% for item in market %}
+    <div id="div_market">
 
-    <p>
-        {{ item["name"] }} : {{ item["current_price"] }} $
-    </p>
+        <h2>Market</h2>
 
-    <form action="/buy_alcohol" method="POST">
+        {% for item in market %}
 
-        <button name="alcohol_id" value="{{ item['alcohol_id'] }}" type="submit">Buy</button>
+            <p>
+                {{ item["name"] }} : {{ item["current_price"] }} $
+            </p>
 
-    </form>
+            <form action="/buy_alcohol" method="POST">
+                <button
+                    name="alcohol_id"
+                    value="{{ item['alcohol_id'] }}"
+                    type="submit">
+                    Buy
+                </button>
+            </form>
 
-{% endfor %}
+        {% endfor %}
+
+    </div>
 
 
-<h2>Stock</h2>
+    <div id="div_stock">
 
-{% for item in inventory_player %}
+        <h2>Stock</h2>
 
-    <p>
-        {{ item["name"] }} : {{ item["amount"] }}
-    </p>
-    <form action="/sell_alcohol" method="POST">
-        <button
-            type="submit"
-            name="alcohol_id"
-            value="{{ item['alcohol_id'] }}">
-            Sell
-        </button>
-    </form>
+        {% for item in inventory_player %}
 
-{% endfor %}
+            <p>
+                {{ item["name"] }} : {{ item["amount"] }}
+            </p>
+
+            <form action="/sell_alcohol" method="POST">
+                <button
+                    type="submit"
+                    name="alcohol_id"
+                    value="{{ item['alcohol_id'] }}">
+                    Sell
+                </button>
+            </form>
+
+        {% endfor %}
+
+    </div>
+
+</div>
 
 {% endblock %}

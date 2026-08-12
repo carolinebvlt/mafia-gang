@@ -3,6 +3,7 @@
 
 <head>
     <title>Mafia-Gang</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 
 <body>
@@ -21,7 +22,7 @@
             Country : {{ player["country"] }}
         </p>
 
-        <form action="/travel" method="POST">
+        <form action="/travel" method="POST" id="travel_form">
 
             <select name="travel">
 
@@ -42,7 +43,11 @@
         </form>
 
     {% endif %}
-
+    <nav id="main_nav">
+        <a href="/market">Market</a>
+        <a href="/targets">Targets</a>
+    </nav>
+    
 </header>
 
 <hr>

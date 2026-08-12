@@ -1,0 +1,29 @@
+body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    align-content: center;
+}
+h1, h2 {
+    align-self: center;
+    text-align: center;
+}
+a {
+    font-size: larger;
+}
+#market_page {
+    display: flex;
+    flex-direction: row;
+    width: 90%;
+    justify-content: space-around;
+}
+#travel_form {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+}
+#main_nav {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+}

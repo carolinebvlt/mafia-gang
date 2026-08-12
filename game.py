@@ -320,12 +320,13 @@ def get_inventory_player(player_id):
 
     curseur.execute("""
         SELECT
-            inventory.alcohol_id,
+            alcohols.id AS alcohol_id,
             alcohols.name,
-            inventory.amount
-        FROM inventory
-        JOIN alcohols ON inventory.alcohol_id = alcohols.id
-        WHERE inventory.player_id = ?
+            COALESCE(inventory.amount, 0) AS amount
+        FROM alcohols
+        LEFT JOIN inventory
+            ON alcohols.id = inventory.alcohol_id
+            AND inventory.player_id = ?
     """, (player_id,))
 
     inventory_player = curseur.fetchall()
