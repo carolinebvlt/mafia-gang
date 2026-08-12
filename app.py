@@ -131,5 +131,16 @@ def sell_alcohol():
 
     return redirect("/market")
 
+@app.route("/hunt")
+def hunt():
+
+    player_id = session.get("player_id")
+    player = game.get_player(player_id)
+
+    return render_template(
+        "hunt.html",
+        player=player,
+        countries=COUNTRIES
+    )
 
 app.run(debug=True)
