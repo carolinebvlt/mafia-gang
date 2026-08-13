@@ -3,4 +3,29 @@
 {% block content %}
 <h2>Hunt</h2>
 Ammo : {{player['ammo']}}
+
+<h3>Select a target</h3>
+
+<h4>NPCs</h4>
+
+<select name="npc_id">
+        <option value="" disabled selected>Choisir une cible</option>
+    {% for npc in npcs %}
+        <option value="{{ npc['id'] }}">
+            {{ npc['name'] }} - Prime : {{ npc['bounty'] }} $
+        </option>
+    {% endfor %}
+</select>
+
+<h4>Players</h4>
+
+<select name="player_id">
+        <option value="" disabled selected>Choisir une cible</option>
+    {% for target in players %}
+        <option value="{{ target['id'] }}">
+            {{ target['name'] }} - Prime : {{ target['bounty'] }} $
+        </option>
+    {% endfor %}
+</select>
+
 {% endblock %}

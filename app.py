@@ -136,11 +136,15 @@ def hunt():
 
     player_id = session.get("player_id")
     player = game.get_player(player_id)
+    npcs = game.get_all_npcs()
+    players = game.get_all_players()
 
     return render_template(
         "hunt.html",
         player=player,
-        countries=COUNTRIES
+        countries=COUNTRIES,
+        npcs = npcs,
+        players = players
     )
 
 app.run(debug=True)

@@ -428,3 +428,29 @@ def init_npcs() :
 
     connexion.commit()
     connexion.close()
+
+def get_all_npcs() :
+    connexion = sqlite3.connect("mafia.db")
+    connexion.row_factory = sqlite3.Row
+    curseur = connexion.cursor()
+
+    curseur.execute("SELECT * FROM npcs")
+
+    npcs = curseur.fetchall()
+    connexion.close()
+
+    return npcs
+
+
+def get_all_players() :
+    connexion = sqlite3.connect("mafia.db")
+    connexion.row_factory = sqlite3.Row
+    curseur = connexion.cursor()
+
+    curseur.execute("SELECT * FROM players")
+
+    players = curseur.fetchall()
+    connexion.close()
+
+
+    return players
