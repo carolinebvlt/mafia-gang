@@ -393,13 +393,13 @@ def check_enough_stock(player_id, alcohol_id, amount):
 
     return inventory_item["amount"] >= amount
 
-def init_npcs() :
+def init_npcs(nbr) :
 
     connexion = sqlite3.connect("mafia.db")
     connexion.row_factory = sqlite3.Row
     curseur = connexion.cursor()
 
-    amount_npcs_to_create = (data.INITIAL_NPCS_NUMBER)
+    amount_npcs_to_create = (nbr)
     npcs = 0
     while npcs < amount_npcs_to_create :
 
