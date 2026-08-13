@@ -418,7 +418,7 @@ def init_npcs() :
         npc_wounds = 0
 
         #Init last move = now
-        npc_last_move = datetime.now()
+        npc_last_move = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
         # add it in database
         curseur.execute("INSERT INTO npcs (name, country, bounty, wounds, last_move) VALUES (?, ?, ?, ?, ?)", 
