@@ -11,3 +11,16 @@ ALCOHOLS = [
     "Whisky",
     "Wine"
 ]
+RANDOM_NAMES = [
+    "James",
+    "Brandon",
+    "William",
+    "Simon",
+    "Lewis",
+    "John",
+    "David",
+    "Henri",
+    "Harris"
+]
+INITIAL_NPCS_NUMBER = 10
+FLY_COST = 250

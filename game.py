@@ -1,12 +1,7 @@
 import sqlite3
 import data
-from datetime import date
+from datetime import date, datetime
 from random import randint, choice
-
-
-def init_game():
-    init_market()
-
 
 def buy_one_ammo(player_id):
 
@@ -340,7 +335,7 @@ def get_inventory_player(player_id):
 
 def travelTo(player_id, country):
 
-    if check_enough_money(player_id, 250):
+    if check_enough_money(player_id, data.FLY_COST):
 
         connexion = sqlite3.connect("mafia.db")
         connexion.row_factory = sqlite3.Row
@@ -352,8 +347,8 @@ def travelTo(player_id, country):
         )
 
         curseur.execute(
-            "UPDATE players SET money = money-250 WHERE id = ?",
-            (player_id,)
+            "UPDATE players SET money = money-? WHERE id = ?",
+            (data.FLY_COST, player_id)
         )
 
         connexion.commit()
@@ -397,3 +392,39 @@ def check_enough_stock(player_id, alcohol_id, amount):
         return False
 
     return inventory_item["amount"] >= amount
+
+def init_npcs() :
+
+    connexion = sqlite3.connect("mafia.db")
+    connexion.row_factory = sqlite3.Row
+    curseur = connexion.cursor()
+
+    amount_npcs_to_create = (data.INITIAL_NPCS_NUMBER)
+    npcs = 0
+    while npcs < amount_npcs_to_create :
+
+        # Create a random name for the npc's by combining 2 names from RANDOM_NAMES
+        first_name = choice(data.RANDOM_NAMES)
+        last_name = choice(data.RANDOM_NAMES)
+        npc_name = first_name+" "+last_name
+
+        # Give him a random country where to start
+        npc_country = choice(data.COUNTRIES)
+
+        # Give him a random bounty between 100 and 1000 $
+        npc_bounty = randint(100, 1000)
+
+        # Init wounds = 0
+        npc_wounds = 0
+
+        #Init last move = now
+        npc_last_move = datetime.now()
+
+        # add it in database
+        curseur.execute("INSERT INTO npcs (name, country, bounty, wounds, last_move) VALUES (?, ?, ?, ?, ?)", 
+                        (npc_name, npc_country, npc_bounty, npc_wounds, npc_last_move ))
+
+        npcs += 1
+
+    connexion.commit()
+    connexion.close()
