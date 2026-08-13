@@ -4,28 +4,42 @@
 <h2>Hunt</h2>
 Ammo : {{player['ammo']}}
 
+{% with messages = get_flashed_messages() %}
+    {% if messages %}
+        <div id="message_flash">
+            {% for message in messages %}
+                <p>{{ message }}</p>
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endwith %}
+
 <h3>Select a target</h3>
 
 <h4>NPCs</h4>
 
-<select name="npc_id">
-        <option value="" disabled selected>Choisir une cible</option>
-    {% for npc in npcs %}
-        <option value="{{ npc['id'] }}">
-            {{ npc['name'] }} - Prime : {{ npc['bounty'] }} $
-        </option>
-    {% endfor %}
-</select>
+<form action="/shoot_npc" method="POST">
+    <select name="npc_id">
+            <option value="" disabled selected>Choisir une cible</option>
+        {% for npc in npcs %}
+            <option value="{{ npc['id'] }}">
+                {{ npc['name'] }} - Prime : {{ npc['bounty'] }} $
+            </option>
+        {% endfor %}
+    </select>
+    <button type="submit" >Shoot</button>
+</form>
+<form action="/shoot_player" method="POST">
+    <h4>Players</h4>
 
-<h4>Players</h4>
-
-<select name="player_id">
-        <option value="" disabled selected>Choisir une cible</option>
-    {% for target in players %}
-        <option value="{{ target['id'] }}">
-            {{ target['name'] }} - Prime : {{ target['bounty'] }} $
-        </option>
-    {% endfor %}
-</select>
-
+    <select name="player_id">
+            <option value="" disabled selected>Choisir une cible</option>
+        {% for target in players %}
+            <option value="{{ target['id'] }}">
+                {{ target['name'] }} - Prime : {{ target['bounty'] }} $
+            </option>
+        {% endfor %}
+    </select>
+    <button type="submit">Shoot</button>
+</form>
 {% endblock %}

@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, session, redirect
+from flask import Flask, render_template, request, session, redirect, flash
 import sqlite3
 from data import COUNTRIES
 import game
@@ -146,5 +146,21 @@ def hunt():
         npcs = npcs,
         players = players
     )
+
+@app.route("/shoot_npc", methods=["POST"])
+def shoot_npc():
+    npc_target_id = request.form["npc_id"]
+    shooter = session.get("player_id")
+    result = game.shoot(shooter, npc_target_id, "npc")
+    flash(result['message'])
+    return redirect("/hunt")
+
+@app.route("/shoot_player", methods=["POST"])
+def shoot_player():
+    player_target_id = request.form["player_id"]
+    shooter = session.get("player_id")
+    result = game.shoot(shooter, player_target_id, "player")
+    flash(result['message'])
+    return redirect("/hunt")
 
 app.run(debug=True)

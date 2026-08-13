@@ -454,3 +454,120 @@ def get_all_players() :
 
 
     return players
+
+def shoot(shooter_id, target_id, npc_or_player) :
+
+    result = {}
+
+    #check if the shooter has enough ammo (at least 1)
+
+    # if he has no ammo : return a message 
+    if check_enough_ammo(shooter_id, 1) == False :
+        result = {
+            "message" : "Not enough ammo"
+        }
+        return result
+
+    else : 
+        # check if the target is alive (different tables : players or npcs)
+        target = get_target(target_id, npc_or_player)
+
+        if target is None:
+            result = {
+                "message": "Target not found."
+            }
+            return result
+
+        # if not alive : return a message
+        if target['wounds'] == 3 :
+            result = {
+                "message" : "The target is already dead..."
+            }
+            return result
+        else :
+            # shoot : -1 ammo for the shooter
+            remove_one_ammo(shooter_id)
+
+            #check if the target is in the same country than the shooter
+            shooter = get_player(shooter_id)
+            
+            # if not in the same country : return a messsage
+            if target['country'] != shooter['country'] :
+                result = {
+                    "message" : "Your target is not in this country..."
+                }
+            else :
+            
+                # add a wound to the target
+                add_wound(target_id, npc_or_player)
+
+                # if 3 wounds = death
+                if target['wounds']+1 == 3 :
+                    death(target_id, npc_or_player)
+                    result = {
+                        "message" : "The target is dead ! GG !"
+                    }
+                else :
+                    result = {
+                        "message" : "The target has been touched ! But still alive..."
+                    }
+    
+    return result
+
+def check_enough_ammo(shooter_id, amount) :
+    shooter = get_player(shooter_id)
+
+    if shooter is None:
+        return False
+
+    if shooter['ammo'] >= amount :
+        return True
+    else : 
+        return False
+
+def get_target(target_id, npc_or_player):
+    connexion = sqlite3.connect("mafia.db")
+    connexion.row_factory = sqlite3.Row
+    curseur = connexion.cursor()
+
+    if npc_or_player == "player" :
+        curseur.execute("SELECT * FROM players WHERE id = ?", 
+                        (target_id,))
+        target = curseur.fetchone()
+    elif npc_or_player == "npc" :
+        curseur.execute("SELECT * FROM npcs WHERE id = ?", 
+                        (target_id,))
+        target = curseur.fetchone()
+    else:
+        target = None
+
+    connexion.close()
+    return target
+
+def add_wound(target_id, npc_or_player) :
+
+    connexion = sqlite3.connect("mafia.db")
+    connexion.row_factory = sqlite3.Row
+    curseur = connexion.cursor()
+
+    if npc_or_player == "player" :
+        curseur.execute("UPDATE players SET wounds = wounds+1 WHERE id = ?",
+                        (target_id,))
+    elif npc_or_player == "npc" :
+        curseur.execute("UPDATE npcs SET wounds = wounds+1 WHERE id = ?", 
+                        (target_id,))
+
+    connexion.commit()
+    connexion.close()
+
+def remove_one_ammo(shooter_id) :
+    connexion = sqlite3.connect("mafia.db")
+    connexion.row_factory = sqlite3.Row
+    curseur = connexion.cursor()
+
+    curseur.execute("UPDATE players SET ammo = ammo-1 WHERE id = ?", 
+                                (shooter_id,))
+
+    connexion.commit()
+    connexion.close()
+
