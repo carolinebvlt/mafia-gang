@@ -4,6 +4,10 @@ from datetime import date
 from random import randint, choice
 
 
+def init_game():
+    init_market()
+
+
 def buy_one_ammo(player_id):
 
     if check_enough_money(player_id, data.AMMO_PRICE):
@@ -98,7 +102,8 @@ def get_player(player_id):
 
     return player
 
-
+# Get the current market for the country where the player is. 
+# Update the market if necessary
 def get_current_market(player_id):
 
     connexion = sqlite3.connect("mafia.db")
@@ -113,12 +118,9 @@ def get_current_market(player_id):
 
     connexion.close()
 
-    # No market yet
+    # Le marché doit normalement déjà être initialisé
     if last_market_update is None:
-
-        init_market()
-
-        return get_market(player_id)
+        return []
 
     date_last_market_update = last_market_update[0]
 
@@ -132,7 +134,7 @@ def get_current_market(player_id):
 
     return get_market(player_id)
 
-
+# Used by get_current_market() 
 def get_market(player_id):
 
     connexion = sqlite3.connect("mafia.db")
@@ -170,7 +172,7 @@ def get_market(player_id):
 
     return market
 
-
+# used by get_current_market() to update the prices everyday
 def update_market():
 
     connexion = sqlite3.connect("mafia.db")
@@ -248,7 +250,7 @@ def init_market():
                 randint(50, 150)
             ))
 
-    # Create/update game state
+    # Create game state
     curseur.execute("""
         INSERT OR REPLACE INTO game_state
         (id, last_market_update)
@@ -335,18 +337,24 @@ def get_inventory_player(player_id):
 
     return inventory_player
 
+
 def travelTo(player_id, country):
 
-    if check_enough_money(player_id, 250) :
+    if check_enough_money(player_id, 250):
 
         connexion = sqlite3.connect("mafia.db")
         connexion.row_factory = sqlite3.Row
         curseur = connexion.cursor()
 
-        curseur.execute("UPDATE players SET country = ? WHERE id = ?",
-                        (country, player_id))
-        curseur.execute("UPDATE players set money = money-250 WHERE id = ?", 
-                        (player_id,))
+        curseur.execute(
+            "UPDATE players SET country = ? WHERE id = ?",
+            (country, player_id)
+        )
+
+        curseur.execute(
+            "UPDATE players SET money = money-250 WHERE id = ?",
+            (player_id,)
+        )
 
         connexion.commit()
         connexion.close()
@@ -380,7 +388,9 @@ def sell_one_alcohol(player_id, alcohol_id):
     connexion.commit()
     connexion.close()
 
+
 def check_enough_stock(player_id, alcohol_id, amount):
+
     inventory_item = get_inventory_item(player_id, alcohol_id)
 
     if inventory_item is None:
