@@ -19,7 +19,9 @@ def init_database():
         country TEXT NOT NULL,
         ammo INTEGER NOT NULL,
         bounty INTEGER NOT NULL DEFAULT 0,
-        wounds INTEGER NOT NULL DEFAULT 0
+        wounds INTEGER NOT NULL DEFAULT 0,
+        work_end REAL,
+        work_duration INTEGER
     )
     """)
 

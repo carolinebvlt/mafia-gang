@@ -26,7 +26,7 @@
     </select>
     <button type="submit">Work</button>
 </form>
-{% if session.get("work_end") %}
+{% if player["work_end"] %}
 
     <h4>Work in progress</h4>
 
@@ -36,7 +36,7 @@
     </p>
 
     <script>
-        const endTime = {{ session.get("work_end") * 1000 }};
+        const endTime = {{ player["work_end"] * 1000 }};
 
         function updateTimer() {
 

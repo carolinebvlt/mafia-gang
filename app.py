@@ -2,6 +2,10 @@ from flask import Flask, render_template, request, session, redirect, flash
 import sqlite3
 from data import COUNTRIES, REWARD_30_MIN_WORK, INITIAL_MONEY, INITIAL_AMMO
 import game
+import players
+import market_functions
+import hunting
+import npcs
 from datetime import datetime, timedelta
 
 app = Flask(__name__)
@@ -16,6 +20,10 @@ def home():
         if "player_id" in request.form:
 
             session["player_id"] = request.form["player_id"]
+
+            # Le nouveau joueur n'hérite pas du travail de l'ancien
+            session.pop("work_end", None)
+            session.pop("work_duration", None)
 
             return redirect("/player")
 
@@ -62,7 +70,7 @@ def player():
 
     player_id = session.get("player_id")
 
-    player = game.get_player(player_id)
+    player = players.get_player(player_id)
 
     return render_template(
         "player.html",
@@ -76,7 +84,7 @@ def buy_ammo():
 
     player_id = session.get("player_id")
 
-    game.buy_one_ammo(player_id)
+    hunting.buy_one_ammo(player_id)
 
     return redirect("/hunt")
 
@@ -86,9 +94,9 @@ def market():
 
     player_id = session.get("player_id")
 
-    player = game.get_player(player_id)
-    market = game.get_current_market(player_id)
-    inventory_player = game.get_inventory_player(player_id)
+    player = players.get_player(player_id)
+    market = market_functions.get_current_market(player_id)
+    inventory_player = players.get_inventory_player(player_id)
 
     return render_template(
         "market.html",
@@ -105,7 +113,7 @@ def buy_alcohol():
     player_id = session.get("player_id")
     alcohol_id = request.form["alcohol_id"]
 
-    game.buy_one_alcohol(player_id, alcohol_id)
+    market_functions.buy_one_alcohol(player_id, alcohol_id)
 
     return redirect("/market")
 
@@ -117,7 +125,7 @@ def travel():
     country = request.form["travel"]
 
     
-    game.travelTo(player_id, country)
+    players.travelTo(player_id, country)
 
     return redirect("/player")
 
@@ -128,7 +136,7 @@ def sell_alcohol():
     alcohol_id = request.form["alcohol_id"]
 
     print(alcohol_id)
-    game.sell_one_alcohol(player_id, alcohol_id)
+    market_functions.sell_one_alcohol(player_id, alcohol_id)
 
     return redirect("/market")
 
@@ -136,23 +144,23 @@ def sell_alcohol():
 def hunt():
 
     player_id = session.get("player_id")
-    player = game.get_player(player_id)
-    npcs = game.get_all_npcs()
-    players = game.get_all_players()
+    player = players.get_player(player_id)
+    npcs_list = npcs.get_all_npcs()
+    all_players = players.get_all_players()
 
     return render_template(
         "hunt.html",
         player=player,
         countries=COUNTRIES,
-        npcs = npcs,
-        players = players
+        npcs = npcs_list,
+        players = all_players
     )
 
 @app.route("/shoot_npc", methods=["POST"])
 def shoot_npc():
     npc_target_id = request.form["npc_id"]
     shooter = session.get("player_id")
-    result = game.shoot(shooter, npc_target_id, "npc")
+    result = hunting.shoot(shooter, npc_target_id, "npc")
     flash(result['message'])
     return redirect("/hunt")
 
@@ -160,22 +168,34 @@ def shoot_npc():
 def shoot_player():
     player_target_id = request.form["player_id"]
     shooter = session.get("player_id")
-    result = game.shoot(shooter, player_target_id, "player")
+    result = hunting.shoot(shooter, player_target_id, "player")
     flash(result['message'])
     return redirect("/hunt")
 
-from datetime import datetime, timedelta
 
 @app.route("/work", methods=["POST"])
 def work():
+    player_id = session.get("player_id")
+
     working_duration = int(request.form["work_duration"])
-    session["work_duration"] = working_duration
 
     # Calcul de l'heure à laquelle le travail sera terminé
     end_time = datetime.now() + timedelta(minutes=working_duration)
 
-    # On garde cette information dans la session
-    session["work_end"] = end_time.timestamp()
+    connexion = game.get_connection()
+    curseur = connexion.cursor()
+
+    curseur.execute(
+        """
+        UPDATE players
+        SET work_end = ?, work_duration = ?
+        WHERE id = ?
+        """,
+        (end_time.timestamp(), working_duration, player_id)
+    )
+
+    connexion.commit()
+    connexion.close()
 
     flash(f"You started working for {working_duration} min.")
 
@@ -185,15 +205,29 @@ def work():
 def finish_work():
 
     player_id = session.get("player_id")
-    working_duration = session.get("work_duration")
 
-    reward = working_duration // 30 * REWARD_30_MIN_WORK
+    player = players.get_player(player_id)
 
-    # add reward for work
-    game.add_money(player_id, reward)
+    working_duration = player["work_duration"]
 
-    # delete work
-    session.pop("work_end", None)
+    reward = working_duration // 30 * 250
+
+    players.add_money(player_id, reward)
+
+    connexion = game.get_connection()
+    curseur = connexion.cursor()
+
+    curseur.execute(
+        """
+        UPDATE players
+        SET work_end = NULL, work_duration = NULL
+        WHERE id = ?
+        """,
+        (player_id,)
+    )
+
+    connexion.commit()
+    connexion.close()
 
     flash(f"You finished working! You earned ${reward}.")
 
