@@ -7,6 +7,7 @@ import market_functions
 import hunting
 import npcs
 from datetime import datetime, timedelta
+from random import randint
 
 app = Flask(__name__)
 app.secret_key = "mafia-secret-key"
@@ -146,6 +147,8 @@ def hunt():
     player_id = session.get("player_id")
     player = players.get_player(player_id)
     npcs_list = npcs.get_all_npcs()
+    if npcs_list.count() < 5 :
+        npcs.init_npcs(randint(1,5))
     all_players = players.get_all_players()
 
     return render_template(
