@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, session, redirect, flash
 import sqlite3
-from data import COUNTRIES, REWARD_30_MIN_WORK
+from data import COUNTRIES, REWARD_30_MIN_WORK, INITIAL_MONEY, INITIAL_AMMO
 import game
 from datetime import datetime, timedelta
 
@@ -21,8 +21,8 @@ def home():
 
         name = request.form["name"]
         country = request.form["country"]
-        money = 1000
-        ammo = 3
+        money = INITIAL_MONEY
+        ammo = INITIAL_AMMO
 
         connexion = sqlite3.connect("mafia.db")
         curseur = connexion.cursor()

@@ -541,7 +541,11 @@ def death(shooter_id, target_id, npc_or_player):
 
         target = get_player(target_id)
 
-        # Player death logic goes here
+        if target is None:
+            return
+        
+        reset_player(target_id)
+
 
     elif npc_or_player == "npc":
 
@@ -647,3 +651,18 @@ def get_all_players() :
     players = curseur.fetchall()
     connexion.close()
     return players
+
+def reset_player(player_id) :
+    connexion = get_connection()
+    curseur = connexion.cursor()
+
+    # set money and ammo to initial amount
+    curseur.execute("UPDATE players SET money = ?, ammo = ?, wounds = 0 WHERE id = ?", 
+                    (data.INITIAL_MONEY, data.INITIAL_AMMO, player_id,))
+
+    # delete stock 
+    curseur.execute("DELETE FROM inventory WHERE player_id = ?", 
+                    (player_id,))
+
+    connexion.commit()
+    connexion.close()
