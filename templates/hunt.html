@@ -29,8 +29,10 @@ Ammo : {{player['ammo']}}
     </select>
     <button type="submit" >Shoot</button>
 </form>
+
+<h4>Players</h4>
 <form action="/shoot_player" method="POST">
-    <h4>Players</h4>
+    
 
     <select name="player_id">
             <option value="" disabled selected>Choisir une cible</option>
@@ -41,5 +43,12 @@ Ammo : {{player['ammo']}}
         {% endfor %}
     </select>
     <button type="submit">Shoot</button>
+</form>
+
+<h4>Buy ammo</h4>
+<form action="/buy_ammo" method="POST">
+    <button>
+        Buy ammo
+    </button>
 </form>
 {% endblock %}

@@ -77,7 +77,7 @@ def buy_ammo():
 
     game.buy_one_ammo(player_id)
 
-    return redirect("/player")
+    return redirect("/hunt")
 
 
 @app.route("/market")

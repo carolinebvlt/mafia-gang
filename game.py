@@ -3,12 +3,17 @@ import data
 from datetime import date, datetime
 from random import randint, choice
 
+
+def get_connection():
+    connexion = sqlite3.connect("mafia.db")
+    connexion.row_factory = sqlite3.Row
+    return connexion
+
 def buy_one_ammo(player_id):
 
     if check_enough_money(player_id, data.AMMO_PRICE):
 
-        connexion = sqlite3.connect("mafia.db")
-        connexion.row_factory = sqlite3.Row
+        connexion = get_connection()
         curseur = connexion.cursor()
 
         curseur.execute(
@@ -19,7 +24,6 @@ def buy_one_ammo(player_id):
         connexion.commit()
         connexion.close()
 
-
 def buy_one_alcohol(player_id, alcohol_id):
 
     item = get_market_item(player_id, alcohol_id)
@@ -29,8 +33,7 @@ def buy_one_alcohol(player_id, alcohol_id):
 
     if check_enough_money(player_id, item["current_price"]):
 
-        connexion = sqlite3.connect("mafia.db")
-        connexion.row_factory = sqlite3.Row
+        connexion = get_connection()
         curseur = connexion.cursor()
 
         curseur.execute(
@@ -58,11 +61,9 @@ def buy_one_alcohol(player_id, alcohol_id):
         connexion.commit()
         connexion.close()
 
-
 def check_enough_money(player_id, amount):
 
-    connexion = sqlite3.connect("mafia.db")
-    connexion.row_factory = sqlite3.Row
+    connexion = get_connection()
     curseur = connexion.cursor()
 
     curseur.execute(
@@ -79,11 +80,9 @@ def check_enough_money(player_id, amount):
 
     return player["money"] >= amount
 
-
 def get_player(player_id):
 
-    connexion = sqlite3.connect("mafia.db")
-    connexion.row_factory = sqlite3.Row
+    connexion = get_connection()
     curseur = connexion.cursor()
 
     curseur.execute(
@@ -97,12 +96,25 @@ def get_player(player_id):
 
     return player
 
-# Get the current market for the country where the player is. 
-# Update the market if necessary
+def get_npc(npc_id):
+
+    connexion = get_connection()
+    curseur = connexion.cursor()
+
+    curseur.execute(
+        "SELECT * FROM npcs WHERE id = ?",
+        (npc_id,)
+    )
+
+    npc = curseur.fetchone()
+
+    connexion.close()
+
+    return npc
+
 def get_current_market(player_id):
 
-    connexion = sqlite3.connect("mafia.db")
-    connexion.row_factory = sqlite3.Row
+    connexion = get_connection()
     curseur = connexion.cursor()
 
     curseur.execute(
@@ -113,27 +125,25 @@ def get_current_market(player_id):
 
     connexion.close()
 
-    # Le marché doit normalement déjà être initialisé
     if last_market_update is None:
-        return []
+
+        return get_market(player_id)
 
     date_last_market_update = last_market_update[0]
 
-    # Market already updated today
     if date_last_market_update == str(date.today()):
 
         return get_market(player_id)
 
-    # New day -> update prices
-    update_market()
+    else:
 
-    return get_market(player_id)
+        update_market()
 
-# Used by get_current_market() 
+        return get_market(player_id)
+
 def get_market(player_id):
 
-    connexion = sqlite3.connect("mafia.db")
-    connexion.row_factory = sqlite3.Row
+    connexion = get_connection()
     curseur = connexion.cursor()
 
     curseur.execute(
@@ -167,11 +177,9 @@ def get_market(player_id):
 
     return market
 
-# used by get_current_market() to update the prices everyday
 def update_market():
 
-    connexion = sqlite3.connect("mafia.db")
-    connexion.row_factory = sqlite3.Row
+    connexion = get_connection()
     curseur = connexion.cursor()
 
     curseur.execute(
@@ -209,10 +217,9 @@ def update_market():
     connexion.commit()
     connexion.close()
 
-
 def init_market():
 
-    connexion = sqlite3.connect("mafia.db")
+    connexion = get_connection()
     curseur = connexion.cursor()
 
     # Make sure all alcohols exist
@@ -245,7 +252,7 @@ def init_market():
                 randint(50, 150)
             ))
 
-    # Create game state
+    # Create/update game state
     curseur.execute("""
         INSERT OR REPLACE INTO game_state
         (id, last_market_update)
@@ -257,11 +264,9 @@ def init_market():
 
     print("market initialized")
 
-
 def get_market_item(player_id, alcohol_id):
 
-    connexion = sqlite3.connect("mafia.db")
-    connexion.row_factory = sqlite3.Row
+    connexion = get_connection()
     curseur = connexion.cursor()
 
     curseur.execute(
@@ -289,11 +294,9 @@ def get_market_item(player_id, alcohol_id):
 
     return item
 
-
 def get_inventory_item(player_id, alcohol_id):
 
-    connexion = sqlite3.connect("mafia.db")
-    connexion.row_factory = sqlite3.Row
+    connexion = get_connection()
     curseur = connexion.cursor()
 
     curseur.execute("""
@@ -308,11 +311,9 @@ def get_inventory_item(player_id, alcohol_id):
 
     return inventory_item
 
-
 def get_inventory_player(player_id):
 
-    connexion = sqlite3.connect("mafia.db")
-    connexion.row_factory = sqlite3.Row
+    connexion = get_connection()
     curseur = connexion.cursor()
 
     curseur.execute("""
@@ -332,13 +333,11 @@ def get_inventory_player(player_id):
 
     return inventory_player
 
-
 def travelTo(player_id, country):
 
     if check_enough_money(player_id, data.FLY_COST):
 
-        connexion = sqlite3.connect("mafia.db")
-        connexion.row_factory = sqlite3.Row
+        connexion = get_connection()
         curseur = connexion.cursor()
 
         curseur.execute(
@@ -354,7 +353,6 @@ def travelTo(player_id, country):
         connexion.commit()
         connexion.close()
 
-
 def sell_one_alcohol(player_id, alcohol_id):
 
     if not check_enough_stock(player_id, alcohol_id, 1):
@@ -365,8 +363,7 @@ def sell_one_alcohol(player_id, alcohol_id):
     if item is None:
         return
 
-    connexion = sqlite3.connect("mafia.db")
-    connexion.row_factory = sqlite3.Row
+    connexion = get_connection()
     curseur = connexion.cursor()
 
     curseur.execute(
@@ -383,7 +380,6 @@ def sell_one_alcohol(player_id, alcohol_id):
     connexion.commit()
     connexion.close()
 
-
 def check_enough_stock(player_id, alcohol_id, amount):
 
     inventory_item = get_inventory_item(player_id, alcohol_id)
@@ -393,20 +389,219 @@ def check_enough_stock(player_id, alcohol_id, amount):
 
     return inventory_item["amount"] >= amount
 
-def init_npcs(nbr) :
+def check_enough_ammo(shooter_id, amount):
 
-    connexion = sqlite3.connect("mafia.db")
-    connexion.row_factory = sqlite3.Row
+    shooter = get_player(shooter_id)
+
+    if shooter is None:
+        return False
+
+    return shooter["ammo"] >= amount
+
+def remove_one_ammo(shooter_id):
+
+    connexion = get_connection()
     curseur = connexion.cursor()
 
-    amount_npcs_to_create = (nbr)
-    npcs = 0
-    while npcs < amount_npcs_to_create :
+    curseur.execute(
+        "UPDATE players SET ammo = ammo-1 WHERE id = ?",
+        (shooter_id,)
+    )
 
-        # Create a random name for the npc's by combining 2 names from RANDOM_NAMES
+    connexion.commit()
+    connexion.close()
+
+def get_target(target_id, npc_or_player):
+
+    connexion = get_connection()
+    curseur = connexion.cursor()
+
+    if npc_or_player == "player":
+
+        curseur.execute(
+            "SELECT * FROM players WHERE id = ?",
+            (target_id,)
+        )
+
+        target = curseur.fetchone()
+
+    elif npc_or_player == "npc":
+
+        curseur.execute(
+            "SELECT * FROM npcs WHERE id = ?",
+            (target_id,)
+        )
+
+        target = curseur.fetchone()
+
+    else:
+
+        target = None
+
+    connexion.close()
+
+    return target
+
+def add_wound(target_id, npc_or_player):
+
+    connexion = get_connection()
+    curseur = connexion.cursor()
+
+    if npc_or_player == "player":
+
+        curseur.execute(
+            "UPDATE players SET wounds = wounds+1 WHERE id = ?",
+            (target_id,)
+        )
+
+    elif npc_or_player == "npc":
+
+        curseur.execute(
+            "UPDATE npcs SET wounds = wounds+1 WHERE id = ?",
+            (target_id,)
+        )
+
+    connexion.commit()
+    connexion.close()
+
+def shoot(shooter_id, target_id, npc_or_player):
+
+    result = {}
+
+    # Check if the shooter has enough ammo
+    if not check_enough_ammo(shooter_id, 1):
+
+        result = {
+            "message": "Not enough ammo"
+        }
+
+        return result
+
+    # Get target
+    target = get_target(target_id, npc_or_player)
+
+    if target is None:
+
+        result = {
+            "message": "Target not found."
+        }
+
+        return result
+
+    # Check if target is already dead
+    if target["wounds"] == 3:
+
+        result = {
+            "message": "The target is already dead..."
+        }
+
+        return result
+
+    # Shoot: remove one ammo
+    remove_one_ammo(shooter_id)
+
+    # Get shooter
+    shooter = get_player(shooter_id)
+
+    # Check if target is in the same country
+    if target["country"] != shooter["country"]:
+
+        result = {
+            "message": "Your target is not in this country..."
+        }
+
+        return result
+
+    # Add wound
+    add_wound(target_id, npc_or_player)
+
+    # Check if this was the third wound
+    if target["wounds"] + 1 == 3:
+
+        death(shooter_id, target_id, npc_or_player)
+
+        result = {
+            "message": "The target is dead ! GG !"
+        }
+
+    else:
+
+        result = {
+            "message": "The target has been touched ! But still alive..."
+        }
+
+    return result
+
+def death(shooter_id, target_id, npc_or_player):
+
+    # Reset the target if it's a player,
+    # delete it if it's a NPC
+
+    if npc_or_player == "player":
+
+        target = get_player(target_id)
+
+        # Player death logic goes here
+
+    elif npc_or_player == "npc":
+
+        target = get_npc(target_id)
+
+        if target is None:
+            return
+
+        delete_npc(target_id)
+
+    else:
+
+        return
+
+    if target is None:
+        return
+
+    bounty = target["bounty"]
+
+    add_money(shooter_id, bounty)
+
+def add_money(player_id, amount):
+
+    connexion = get_connection()
+    curseur = connexion.cursor()
+
+    curseur.execute(
+        "UPDATE players SET money = money + ? WHERE id = ?",
+        (amount, player_id)
+    )
+
+    connexion.commit()
+    connexion.close()
+
+def delete_npc(npc_id):
+
+    connexion = get_connection()
+    curseur = connexion.cursor()
+
+    curseur.execute(
+        "DELETE FROM npcs WHERE id = ?",
+        (npc_id,)
+    )
+
+    connexion.commit()
+    connexion.close()
+
+def init_npcs(amount_npcs_to_create):
+
+    connexion = get_connection()
+    curseur = connexion.cursor()
+
+    npcs = 0
+
+    while npcs < amount_npcs_to_create:
+
+        # Create a random name for the NPC
         first_name = choice(data.RANDOM_NAMES)
         last_name = choice(data.RANDOM_NAMES)
-        npc_name = first_name+" "+last_name
+        npc_name = first_name + " " + last_name
 
         # Give him a random country where to start
         npc_country = choice(data.COUNTRIES)
@@ -417,12 +612,20 @@ def init_npcs(nbr) :
         # Init wounds = 0
         npc_wounds = 0
 
-        #Init last move = now
+        # Init last move
         npc_last_move = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-        # add it in database
-        curseur.execute("INSERT INTO npcs (name, country, bounty, wounds, last_move) VALUES (?, ?, ?, ?, ?)", 
-                        (npc_name, npc_country, npc_bounty, npc_wounds, npc_last_move ))
+        curseur.execute("""
+            INSERT INTO npcs
+            (name, country, bounty, wounds, last_move)
+            VALUES (?, ?, ?, ?, ?)
+        """, (
+            npc_name,
+            npc_country,
+            npc_bounty,
+            npc_wounds,
+            npc_last_move
+        ))
 
         npcs += 1
 
@@ -430,144 +633,17 @@ def init_npcs(nbr) :
     connexion.close()
 
 def get_all_npcs() :
-    connexion = sqlite3.connect("mafia.db")
-    connexion.row_factory = sqlite3.Row
+    connexion = get_connection()
     curseur = connexion.cursor()
-
     curseur.execute("SELECT * FROM npcs")
-
     npcs = curseur.fetchall()
     connexion.close()
-
     return npcs
 
-
 def get_all_players() :
-    connexion = sqlite3.connect("mafia.db")
-    connexion.row_factory = sqlite3.Row
+    connexion = get_connection()
     curseur = connexion.cursor()
-
     curseur.execute("SELECT * FROM players")
-
     players = curseur.fetchall()
     connexion.close()
-
-
     return players
-
-def shoot(shooter_id, target_id, npc_or_player) :
-
-    result = {}
-
-    #check if the shooter has enough ammo (at least 1)
-
-    # if he has no ammo : return a message 
-    if check_enough_ammo(shooter_id, 1) == False :
-        result = {
-            "message" : "Not enough ammo"
-        }
-        return result
-
-    else : 
-        # check if the target is alive (different tables : players or npcs)
-        target = get_target(target_id, npc_or_player)
-
-        if target is None:
-            result = {
-                "message": "Target not found."
-            }
-            return result
-
-        # if not alive : return a message
-        if target['wounds'] == 3 :
-            result = {
-                "message" : "The target is already dead..."
-            }
-            return result
-        else :
-            # shoot : -1 ammo for the shooter
-            remove_one_ammo(shooter_id)
-
-            #check if the target is in the same country than the shooter
-            shooter = get_player(shooter_id)
-            
-            # if not in the same country : return a messsage
-            if target['country'] != shooter['country'] :
-                result = {
-                    "message" : "Your target is not in this country..."
-                }
-            else :
-            
-                # add a wound to the target
-                add_wound(target_id, npc_or_player)
-
-                # if 3 wounds = death
-                if target['wounds']+1 == 3 :
-                    death(target_id, npc_or_player)
-                    result = {
-                        "message" : "The target is dead ! GG !"
-                    }
-                else :
-                    result = {
-                        "message" : "The target has been touched ! But still alive..."
-                    }
-    
-    return result
-
-def check_enough_ammo(shooter_id, amount) :
-    shooter = get_player(shooter_id)
-
-    if shooter is None:
-        return False
-
-    if shooter['ammo'] >= amount :
-        return True
-    else : 
-        return False
-
-def get_target(target_id, npc_or_player):
-    connexion = sqlite3.connect("mafia.db")
-    connexion.row_factory = sqlite3.Row
-    curseur = connexion.cursor()
-
-    if npc_or_player == "player" :
-        curseur.execute("SELECT * FROM players WHERE id = ?", 
-                        (target_id,))
-        target = curseur.fetchone()
-    elif npc_or_player == "npc" :
-        curseur.execute("SELECT * FROM npcs WHERE id = ?", 
-                        (target_id,))
-        target = curseur.fetchone()
-    else:
-        target = None
-
-    connexion.close()
-    return target
-
-def add_wound(target_id, npc_or_player) :
-
-    connexion = sqlite3.connect("mafia.db")
-    connexion.row_factory = sqlite3.Row
-    curseur = connexion.cursor()
-
-    if npc_or_player == "player" :
-        curseur.execute("UPDATE players SET wounds = wounds+1 WHERE id = ?",
-                        (target_id,))
-    elif npc_or_player == "npc" :
-        curseur.execute("UPDATE npcs SET wounds = wounds+1 WHERE id = ?", 
-                        (target_id,))
-
-    connexion.commit()
-    connexion.close()
-
-def remove_one_ammo(shooter_id) :
-    connexion = sqlite3.connect("mafia.db")
-    connexion.row_factory = sqlite3.Row
-    curseur = connexion.cursor()
-
-    curseur.execute("UPDATE players SET ammo = ammo-1 WHERE id = ?", 
-                                (shooter_id,))
-
-    connexion.commit()
-    connexion.close()
-
