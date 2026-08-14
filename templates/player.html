@@ -12,5 +12,72 @@
 
 <p>Ammo: {{player["ammo"]}}</p> 
 
+<h4>Work</h4>
+<p>Earn 250 $ for 30 min of work</p>
+{% with messages = get_flashed_messages() %}
+    {% if messages %}
+        <div id="message_flash">
+            {% for message in messages %}
+                <p>{{ message }}</p>
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endwith %}
+<form action="/work" method="POST">
+    <select name="work_duration" id="">
+        <option value="" disabled selected>Select working duration</option>
+        <option value="30">30 min</option>
+        <option value="60">60 min</option>
+        <option value="90">90 min</option>
+        <option value="120">120 min</option>
+        
+    </select>
+    <button type="submit">Work</button>
+</form>
+{% if session.get("work_end") %}
+
+    <h4>Work in progress</h4>
+
+    <p>
+        Time remaining:
+        <span id="timer">Loading...</span>
+    </p>
+
+    <script>
+        const endTime = {{ session.get("work_end") * 1000 }};
+
+        function updateTimer() {
+
+            const now = Date.now();
+            const remaining = endTime - now;
+
+            if (remaining <= 0) {
+
+                document.getElementById("timer").textContent = "Finished!";
+
+                fetch("/work/finish", {
+                    method: "POST"
+                }).then(() => {
+                    window.location.reload();
+                });
+
+                return;
+            }
+
+            const totalSeconds = Math.floor(remaining / 1000);
+
+            const minutes = Math.floor(totalSeconds / 60);
+            const seconds = totalSeconds % 60;
+
+            document.getElementById("timer").textContent =
+                minutes + ":" + String(seconds).padStart(2, "0");
+        }
+
+        updateTimer();
+
+        setInterval(updateTimer, 1000);
+    </script>
+
+{% endif %}
 
 {% endblock %}

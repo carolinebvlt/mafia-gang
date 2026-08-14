@@ -1,7 +1,8 @@
 from flask import Flask, render_template, request, session, redirect, flash
 import sqlite3
-from data import COUNTRIES
+from data import COUNTRIES, REWARD_30_MIN_WORK
 import game
+from datetime import datetime, timedelta
 
 app = Flask(__name__)
 app.secret_key = "mafia-secret-key"
@@ -162,5 +163,41 @@ def shoot_player():
     result = game.shoot(shooter, player_target_id, "player")
     flash(result['message'])
     return redirect("/hunt")
+
+from datetime import datetime, timedelta
+
+@app.route("/work", methods=["POST"])
+def work():
+    working_duration = int(request.form["work_duration"])
+    session["work_duration"] = working_duration
+
+    # Calcul de l'heure à laquelle le travail sera terminé
+    end_time = datetime.now() + timedelta(minutes=working_duration)
+
+    # On garde cette information dans la session
+    session["work_end"] = end_time.timestamp()
+
+    flash(f"You started working for {working_duration} min.")
+
+    return redirect("/player")
+
+@app.route("/work/finish", methods=["POST"])
+def finish_work():
+
+    player_id = session.get("player_id")
+    working_duration = session.get("work_duration")
+
+    reward = working_duration // 30 * REWARD_30_MIN_WORK
+
+    # add reward for work
+    game.add_money(player_id, reward)
+
+    # delete work
+    session.pop("work_end", None)
+
+    flash(f"You finished working! You earned ${reward}.")
+
+    return redirect("/player")
+
 
 app.run(debug=True)
