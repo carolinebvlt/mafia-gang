@@ -196,4 +196,30 @@ def get_target(target_id, npc_or_player):
 
     return target
 
+def bounty_on_player(player_id, target_id, bounty) :
+    # check if the player has enough money
+    if not players.check_enough_money(player_id, bounty) :
+        result = {
+            "message":"You don't have enough money..."
+        }
+        return result
+    else :
+        # Put the bounty on the target and if it works, substract money
+        modify_bounty(target_id, bounty)
+        players.substract_money(player_id, bounty)
+        result = {
+            "message":"Bounty on the target's head !"
+        }
+        return result
 
+def modify_bounty(target_id, amount) :
+    connexion = game.get_connection()
+    curseur = connexion.cursor()
+
+    curseur.execute(
+        "UPDATE players SET bounty = bounty + ? WHERE id = ?",
+        (amount, target_id)
+    )
+
+    connexion.commit()
+    connexion.close()

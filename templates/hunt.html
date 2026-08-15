@@ -19,6 +19,24 @@ Ammo : {{player['ammo']}}
 <h4>NPCs</h4>
 
 <form action="/shoot_npc" method="POST">
+    <select name="npc_id">
+        <option value="" disabled selected>Choisir une cible</option>
+
+        {% for npc in npcs %}
+            <option value="{{ npc['id'] }}">
+                {{ npc['name'] }} - Prime : {{ npc['bounty'] }} $
+            </option>
+        {% endfor %}
+    </select>
+
+    <button type="submit">Shoot</button>
+</form>
+
+
+<h4>Players</h4>
+
+<form action="/shoot_player" method="POST">
+
     <select name="player_id">
         <option value="" disabled selected>Choisir une cible</option>
 
@@ -35,29 +53,46 @@ Ammo : {{player['ammo']}}
         {% endfor %}
 
     </select>
-    <button type="submit" >Shoot</button>
-</form>
 
-<h4>Players</h4>
-<form action="/shoot_player" method="POST">
-    
-
-    <select name="player_id">
-            <option value="" disabled selected>Choisir une cible</option>
-        {% for target in players %}
-            {% if player['id'] != target['id']%}
-            <option value="{{ target['id'] }}">
-                {{ target['name'] }} - Prime : {{ target['bounty'] }} $
-            </option>
-        {% endfor %}
-    </select>
     <button type="submit">Shoot</button>
+
 </form>
+
 
 <h4>Buy ammo</h4>
+
 <form action="/buy_ammo" method="POST">
     <button>
         Buy ammo
     </button>
 </form>
+
+
+<h3>Put a bounty on someone's head</h3>
+
+<form action="/bounty_on_player" method="POST">
+
+    <select name="player_id">
+        <option value="" disabled selected>Choisir une cible</option>
+
+        {% for target in players %}
+
+            {% if player['id'] != target['id'] %}
+
+                <option value="{{ target['id'] }}">
+                    {{ target['name'] }}
+                </option>
+
+            {% endif %}
+
+        {% endfor %}
+
+    </select>
+
+    <input type="number" name="bounty_on_player" min="1" required> $
+
+    <button type="submit">Put a bounty on that head !</button>
+
+</form>
+
 {% endblock %}

@@ -73,6 +73,19 @@ def add_money(player_id, amount):
     connexion.commit()
     connexion.close()
 
+def substract_money(player_id, amount):
+
+    connexion = game.get_connection()
+    curseur = connexion.cursor()
+
+    curseur.execute(
+        "UPDATE players SET money = money - ? WHERE id = ?",
+        (amount, player_id)
+    )
+
+    connexion.commit()
+    connexion.close()
+
 def travelTo(player_id, country):
 
     if check_enough_money(player_id, data.FLY_COST):

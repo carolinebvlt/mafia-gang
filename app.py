@@ -147,7 +147,7 @@ def hunt():
     player_id = session.get("player_id")
     player = players.get_player(player_id)
     npcs_list = npcs.get_all_npcs()
-    if npcs_list.count() < 5 :
+    if len(npcs_list) < 5 :
         npcs.init_npcs(randint(1,5))
     all_players = players.get_all_players()
 
@@ -236,5 +236,17 @@ def finish_work():
 
     return redirect("/player")
 
+
+@app.route("/bounty_on_player", methods=["POST"])
+def bounty_on_player(): 
+
+    player_id = session.get("player_id")
+    target_id = request.form['player_id']
+    bounty = int(request.form['bounty_on_player'])
+
+    result = hunting.bounty_on_player(player_id, target_id, bounty)
+    flash(result['message'])
+    
+    return redirect("/hunt")
 
 app.run(debug=True)
