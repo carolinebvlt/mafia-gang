@@ -260,4 +260,19 @@ def bounty_on_player():
     
     return redirect("/hunt")
 
+@app.route("/top10")
+def top10():
+    top10_crime = players.get_top10_crime()
+    top10_bounty = players.get_top10_bounty()
+    player_id = session.get("player_id")
+    player = players.get_player(player_id)
+
+    return render_template(
+        "top10.html",
+        top10_crime = top10_crime,
+        top10_bounty = top10_bounty,
+        player = player
+        )
+
+
 app.run(debug=True)

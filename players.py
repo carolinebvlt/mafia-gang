@@ -182,3 +182,19 @@ def add_crime_points(player_id, points) :
                     (points, player_id))
     connexion.commit()
     connexion.close()
+
+def get_top10_crime():
+    connexion = game.get_connection()
+    curseur = connexion.cursor()
+    curseur.execute("SELECT * FROM players ORDER BY crime_points DESC LIMIT 10")
+    top10_crime = curseur.fetchall()
+    connexion.close()
+    return top10_crime
+
+def get_top10_bounty():
+    connexion = game.get_connection()
+    curseur = connexion.cursor()
+    curseur.execute("SELECT * FROM players ORDER BY bounty DESC LIMIT 10")
+    top10_bounty = curseur.fetchall()
+    connexion.close()
+    return top10_bounty

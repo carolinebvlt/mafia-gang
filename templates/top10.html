@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+    <h3>Worst criminals</h3>
+
+    <ol>
+        {% for player in top10_crime %}
+            <li>
+                {{ player["name"] }} -
+                {{ player["crime_points"] }} crime points
+            </li>
+        {% endfor %}
+    </ol>
+
+    <h3>Most wanted</h3>
+
+    <ol>
+        {% for player in top10_bounty %}
+            <li>
+                {{ player["name"] }} -
+                {{ player["bounty"] }} $
+            </li>
+        {% endfor %}
+    </ol>
+
+{% endblock %}
