@@ -175,3 +175,10 @@ def get_market_item(player_id, alcohol_id):
 
     return item
 
+def add_crime_points(player_id, points) :
+    connexion = game.get_connection()
+    curseur = connexion.cursor()
+    curseur.execute("UPDATE players SET crime_points = crime_points + ? WHERE id = ?", 
+                    (points, player_id))
+    connexion.commit()
+    connexion.close()

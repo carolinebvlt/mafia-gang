@@ -15,11 +15,19 @@
     {% if player %}
 
         <p>
-            Joueur : {{ player["name"] }}
+            Player : {{ player["name"] }}
             |
-            Argent : {{ player["money"] }} $
+            Money:
+            {% if player["money"] < 0 %}
+                <span style="color: red;">{{ player["money"] }}</span>
+            {% else %}
+                {{ player["money"] }}
+            {% endif %}
+         $
             |
             Country : {{ player["country"] }}
+            |
+            Crime points : {{player["crime_points"]}}
         </p>
 
         <form action="/travel" method="POST" id="travel_form">
@@ -48,6 +56,15 @@
         <a href="/market">Alcohol Market</a>
         <a href="/hunt">Hunt</a>
     </nav>
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div id="message_flash">
+                    {% for message in messages %}
+                        <p>{{ message }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
     
 </header>
 

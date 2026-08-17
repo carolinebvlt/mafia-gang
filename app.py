@@ -6,6 +6,7 @@ import players
 import market_functions
 import hunting
 import npcs
+import police
 from datetime import datetime, timedelta
 from random import randint
 
@@ -125,8 +126,17 @@ def travel():
     player_id = session.get("player_id")
     country = request.form["travel"]
 
+    player = players.get_player(player_id)
+    if country != player["country"] :
     
-    players.travelTo(player_id, country)
+        players.travelTo(player_id, country)
+
+        decision = police.decide_to_control(player_id)
+        if decision == True :
+            penalty = police.control(player_id)
+            players.substract_money(player_id, penalty)
+            flash(f"You got arrested and have to pay {penalty} $ to get free !")
+
 
     return redirect("/player")
 
@@ -181,26 +191,27 @@ def work():
     player_id = session.get("player_id")
 
     working_duration = int(request.form["work_duration"])
+    if working_duration != 0 :
 
-    # Calcul de l'heure à laquelle le travail sera terminé
-    end_time = datetime.now() + timedelta(minutes=working_duration)
+        # Calcul de l'heure à laquelle le travail sera terminé
+        end_time = datetime.now() + timedelta(minutes=working_duration)
 
-    connexion = game.get_connection()
-    curseur = connexion.cursor()
+        connexion = game.get_connection()
+        curseur = connexion.cursor()
 
-    curseur.execute(
-        """
-        UPDATE players
-        SET work_end = ?, work_duration = ?
-        WHERE id = ?
-        """,
-        (end_time.timestamp(), working_duration, player_id)
-    )
+        curseur.execute(
+            """
+            UPDATE players
+            SET work_end = ?, work_duration = ?
+            WHERE id = ?
+            """,
+            (end_time.timestamp(), working_duration, player_id)
+        )
 
-    connexion.commit()
-    connexion.close()
+        connexion.commit()
+        connexion.close()
 
-    flash(f"You started working for {working_duration} min.")
+        flash(f"You started working for {working_duration} min.")
 
     return redirect("/player")
 

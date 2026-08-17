@@ -134,9 +134,9 @@ def shoot(shooter_id, target_id, npc_or_player):
         result = {
             "message": "The target is dead ! GG !"
         }
-
+        players.add_crime_points(shooter_id, data.CRIME_SENTENCE_KILL)
     else:
-
+        players.add_crime_points(shooter_id, data.CRIME_SENTENCE_SHOOT)
         result = {
             "message": "The target has been touched ! But still alive..."
         }

@@ -28,3 +28,10 @@ INITIAL_AMMO = 3
 
 FLY_COST = 250
 REWARD_30_MIN_WORK = 100
+
+# crime levels
+crime_levels = [
+    0, 50, 100, 200, 500, 1000
+]
+CRIME_SENTENCE_SHOOT = 1
+CRIME_SENTENCE_KILL = 5

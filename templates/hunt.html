@@ -4,16 +4,6 @@
 <h2>Hunt</h2>
 Ammo : {{player['ammo']}}
 
-{% with messages = get_flashed_messages() %}
-    {% if messages %}
-        <div id="message_flash">
-            {% for message in messages %}
-                <p>{{ message }}</p>
-            {% endfor %}
-        </div>
-    {% endif %}
-{% endwith %}
-
 <h3>Select a target</h3>
 
 <h4>NPCs</h4>

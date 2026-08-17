@@ -18,6 +18,7 @@ def init_database():
         money INTEGER NOT NULL,
         country TEXT NOT NULL,
         ammo INTEGER NOT NULL,
+        crime_points INTEGER NOT NULL DEFAULT 0,
         bounty INTEGER NOT NULL DEFAULT 0,
         wounds INTEGER NOT NULL DEFAULT 0,
         work_end REAL,

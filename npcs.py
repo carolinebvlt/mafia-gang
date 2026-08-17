@@ -45,6 +45,7 @@ def init_npcs(amount_npcs_to_create):
 
     connexion.commit()
     connexion.close()
+    print("NPCS init")
 
 def get_npc(npc_id):
 
